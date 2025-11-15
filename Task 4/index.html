@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Simple Login System</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #1a1a1d;
+        color: #fff;
+        padding: 40px;
+    }
+
+    .box {
+        max-width: 350px;
+        margin: auto;
+        padding: 20px;
+        background: #242427;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+        text-align: center;
+        color: #ffd369;
+    }
+
+    input {
+        width: 100%;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+        border: none;
+        outline: none;
+        background: #333;
+        color: #fff;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 5px;
+        background: #00b894;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    #securedPage {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    #logoutBtn {
+        background: #d63031;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="box" id="authBox">
+    <h2>Login System</h2>
+
+    <input id="username" type="text" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="login()">Login</button>
+    <button style="background:#0984e3;" onclick="register()">Register</button>
+
+    <p id="msg" style="color:#ffd369; text-align:center;"></p>
+</div>
+
+<div class="box" id="securedPage">
+    <h2>Welcome!</h2>
+    <p>You have successfully logged in.</p>
+
+    <button id="logoutBtn" onclick="logout()">Logout</button>
+</div>
+
+<script>
+function register() {
+    let user = document.getElementById("username").value;
+    let pass = document.getElementById("password").value;
+
+    if (user === "" || pass === "") {
+        document.getElementById("msg").innerText = "Fields cannot be empty!";
+        return;
+    }
+
+    localStorage.setItem("savedUser", user);
+    localStorage.setItem("savedPass", pass);
+
+    document.getElementById("msg").innerText = "Registered Successfully!";
+}
+
+function login() {
+    let user = document.getElementById("username").value;
+    let pass = document.getElementById("password").value;
+
+    let savedUser = localStorage.getItem("savedUser");
+    let savedPass = localStorage.getItem("savedPass");
+
+    if (user === savedUser && pass === savedPass) {
+        document.getElementById("authBox").style.display = "none";
+        document.getElementById("securedPage").style.display = "block";
+    } else {
+        document.getElementById("msg").innerText = "Invalid username or password!";
+    }
+}
+
+function logout() {
+    document.getElementById("securedPage").style.display = "none";
+    document.getElementById("authBox").style.display = "block";
+}
+</script>
+
+</body>
+</html>
