@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calculator</title>
+  <style>
+    /* minimal styling */
+    :root { --bg:#101820; --panel:#1e1e1e; --btn:#333; --op:#ff9500; --clear:#c0392b; --equal:#27ae60; color-scheme: dark; }
+    body{background:var(--bg);display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:Arial,Helvetica,sans-serif}
+    .calculator{width:320px;background:var(--panel);padding:20px;border-radius:12px;box-shadow:0 6px 30px rgba(0,0,0,.5)}
+    .display{width:100%;height:56px;border-radius:8px;border:none;padding:12px;font-size:20px;text-align:right;margin-bottom:12px;background:#0f1112;color:#fff}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    button{padding:14px;font-size:18px;border-radius:8px;border:none;background:var(--btn);color:#fff;cursor:pointer}
+    button.operator{background:var(--op)}
+    button.clear{background:var(--clear)}
+    button.equal{grid-column:1 / -1;background:var(--equal)}
+    /* make buttons highlightable for testing */
+    button:active{transform:translateY(1px)}
+  </style>
+</head>
+<body>
+
+  <div class="calculator" aria-label="Simple calculator">
+    <!-- readonly instead of disabled so JS can set value and user can copy -->
+    <input id="display" class="display" type="text" readonly value="" aria-label="Calculator display">
+
+    <div class="grid" id="buttons">
+      <!-- use data-value so JS reads values reliably -->
+      <button data-value="7">7</button>
+      <button data-value="8">8</button>
+      <button data-value="9">9</button>
+      <button class="operator" data-value="/">/</button>
+
+      <button data-value="4">4</button>
+      <button data-value="5">5</button>
+      <button data-value="6">6</button>
+      <button class="operator" data-value="*">*</button>
+
+      <button data-value="1">1</button>
+      <button data-value="2">2</button>
+      <button data-value="3">3</button>
+      <button class="operator" data-value="-">-</button>
+
+      <button data-value="0">0</button>
+      <button data-value=".">.</button>
+      <button class="clear" id="clear">C</button>
+      <button class="operator" data-value="+">+</button>
+
+      <button class="equal" id="equals">=</button>
+    </div>
+  </div>
+
+  <script>
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const display = document.getElementById('display');
+      const buttons = document.getElementById('buttons');
+
+      // Central click handler using event delegation
+      buttons.addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+
+        // clear button
+        if (btn.id === 'clear') {
+          display.value = '';
+          return;
+        }
+
+        // equals button
+        if (btn.id === 'equals') {
+          evaluateDisplay();
+          return;
+        }
+
+        // other buttons: add their data-value to display
+        const val = btn.getAttribute('data-value');
+        if (val !== null) {
+          display.value += val;
+        }
+      });
+
+      // safe-ish evaluator: allow digits, operators and dot only
+      function evaluateDisplay() {
+        const expr = display.value.trim();
+
+        if (!expr) return;
+
+        // Reject any unexpected characters (quick safety & debugging)
+        if (!/^[0-9+\-*/().\s]+$/.test(expr)) {
+          display.value = 'Error';
+          console.error('Invalid characters in expression:', expr);
+          return;
+        }
+
+        try {
+          // Use Function constructor to evaluate — slightly safer than eval here since we validated chars
+          // Still only use in trusted/learning contexts.
+          const result = new Function('return ' + expr)();
+          // handle Infinity / NaN
+          if (!isFinite(result)) {
+            display.value = 'Error';
+          } else {
+            display.value = String(result);
+          }
+        } catch (err) {
+          display.value = 'Error';
+          console.error('Calculation failed:', err);
+        }
+      }
+
+      // keyboard support (optional)
+      window.addEventListener('keydown', (e) => {
+        // allow numbers, operators, Enter and Backspace
+        if (/^[0-9+\-*/().]$/.test(e.key)) {
+          display.value += e.key;
+          e.preventDefault();
+          return;
+        }
+        if (e.key === 'Enter') {
+          evaluateDisplay();
+          e.preventDefault();
+          return;
+        }
+        if (e.key === 'Backspace') {
+          display.value = display.value.slice(0, -1);
+          e.preventDefault();
+          return;
+        }
+        if (e.key.toLowerCase() === 'c') {
+          display.value = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
